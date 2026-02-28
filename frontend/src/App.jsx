@@ -11,20 +11,33 @@ function MainApp() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // New State for features
+  const [editingNote, setEditingNote] = useState(null);
+  const [selectedNoteIds, setSelectedNoteIds] = useState([]);
+
   const handleNoteAdded = (newNote) => {
     setNotes([newNote, ...notes]);
+  };
+
+  const handleNoteUpdated = (updatedNote) => {
+    setNotes(notes.map(note => note._id === updatedNote._id ? updatedNote : note));
   };
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
       <header className="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
         <Link to="/" className="text-3xl font-bold text-gray-800 tracking-tight hover:text-blue-600 transition-colors">MyNotes</Link>
-        <ExportButton hasNotes={notes.length > 0} />
+        <ExportButton hasNotes={notes.length > 0} selectedNoteIds={selectedNoteIds} />
       </header>
 
       <main className="grid grid-cols-1 md:grid-cols-12 gap-8">
         <div className="md:col-span-4 lg:col-span-4 self-start">
-          <NoteForm onNoteAdded={handleNoteAdded} />
+          <NoteForm
+            onNoteAdded={handleNoteAdded}
+            onNoteUpdated={handleNoteUpdated}
+            editingNote={editingNote}
+            setEditingNote={setEditingNote}
+          />
         </div>
         <div className="md:col-span-8 lg:col-span-8">
           <NotesList
@@ -32,6 +45,9 @@ function MainApp() {
             setNotes={setNotes}
             loading={loading}
             setLoading={setLoading}
+            setEditingNote={setEditingNote}
+            selectedNoteIds={selectedNoteIds}
+            setSelectedNoteIds={setSelectedNoteIds}
           />
         </div>
       </main>
@@ -44,7 +60,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<MainApp />} />
-        {/* Placeholder for future routes (e.g., Settings, Profile) */}
         <Route path="*" element={<MainApp />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />

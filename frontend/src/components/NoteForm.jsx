@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { createNote } from '../services/api';
+import { createNote, updateNote } from '../services/api';
 import { toast } from 'react-toastify';
 
-const NoteForm = ({ onNoteAdded }) => {
+const NoteForm = ({ onNoteAdded, onNoteUpdated, editingNote, setEditingNote }) => {
     const [loading, setLoading] = useState(false);
 
     const {
         register,
         handleSubmit,
         reset,
+        setValue,
         formState: { errors }
     } = useForm({
         defaultValues: {
@@ -18,23 +19,47 @@ const NoteForm = ({ onNoteAdded }) => {
         }
     });
 
+    // Populate form if we are editing
+    useEffect(() => {
+        if (editingNote) {
+            setValue('title', editingNote.title);
+            setValue('content', editingNote.content);
+        } else {
+            reset();
+        }
+    }, [editingNote, setValue, reset]);
+
     const onSubmit = async (data) => {
         try {
             setLoading(true);
-            const newNote = await createNote(data);
-            onNoteAdded(newNote);
+            if (editingNote) {
+                const updated = await updateNote(editingNote._id, data);
+                onNoteUpdated(updated);
+                setEditingNote(null);
+                toast.success('Note updated successfully!');
+            } else {
+                const newNote = await createNote(data);
+                onNoteAdded(newNote);
+                toast.success('Note created successfully!');
+            }
             reset(); // Clear form
-            toast.success('Note created successfully!');
         } catch (err) {
-            toast.error(err.response?.data?.message || 'Failed to create note');
+            toast.error(err.response?.data?.message || 'Failed to save note');
         } finally {
             setLoading(false);
         }
     };
 
+    const handleCancelEdit = () => {
+        setEditingNote(null);
+        reset();
+    };
+
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Create a Note</h2>
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                {editingNote ? 'Edit Note' : 'Create a Note'}
+            </h2>
 
             <div className="mb-4">
                 <input
@@ -72,13 +97,26 @@ const NoteForm = ({ onNoteAdded }) => {
                 )}
             </div>
 
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-                {loading ? 'Saving...' : 'Save Note'}
-            </button>
+            <div className="flex gap-2">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-grow bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                    {loading ? 'Saving...' : (editingNote ? 'Update Note' : 'Save Note')}
+                </button>
+
+                {editingNote && (
+                    <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        disabled={loading}
+                        className="bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                )}
+            </div>
         </form>
     );
 };

@@ -33,10 +33,15 @@ MyNotes is a full-stack web application for creating, managing, and exporting no
 4. Start the server:
    - Development: `node server.js` (or setup Nodemon later)
 
-### Frontend Setup
-1. Navigate to the `frontend` directory: `cd frontend`
-2. Install dependencies: `npm install`
-3. Start the Vite development server: `npm run dev`
+### Docker Setup (Recommended)
+You can run the entire stack using Docker Compose. Ensure you have Docker Desktop installed.
+
+1. Create your `.env` file in the root directory (or just use `backend/.env`) with `MONGO_URI`.
+2. Run the following command from the root directory:
+   ```bash
+   docker-compose up --build
+   ```
+3. The frontend will be available at `http://localhost:80` and the backend at `http://localhost:5000`.
 
 ---
 
@@ -49,4 +54,3 @@ MyNotes is a full-stack web application for creating, managing, and exporting no
 | DELETE | `/api/notes/:id` | Delete note          |
 | GET    | `/api/export`    | Export notes as .txt |
 
-_More features and Docker support coming soon._

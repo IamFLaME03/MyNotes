@@ -2,13 +2,22 @@ import fs from 'fs/promises';
 import path from 'path';
 import Note from '../models/Note.js';
 
-// @desc    Export all notes to a text file
+// @desc    Export notes to a text file (supports ?ids=id1,id2)
 // @route   GET /api/export
 // @access  Public
 export const exportNotes = async (req, res) => {
     try {
-        // 1. Fetch all notes from MongoDB
-        const notes = await Note.find({}).sort({ createdAt: -1 });
+        const { ids } = req.query;
+        let query = {};
+
+        // If specific IDs are requested, filter the query
+        if (ids) {
+            const idArray = ids.split(',');
+            query = { _id: { $in: idArray } };
+        }
+
+        // 1. Fetch notes from MongoDB
+        const notes = await Note.find(query).sort({ createdAt: -1 });
 
         // 2. Transform the notes into formatted plain text
         if (notes.length === 0) {

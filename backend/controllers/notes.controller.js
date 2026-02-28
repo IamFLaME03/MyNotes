@@ -38,6 +38,37 @@ export const getNotes = async (req, res) => {
     }
 };
 
+// @desc    Update a note
+// @route   PUT /api/notes/:id
+// @access  Public
+export const updateNote = async (req, res) => {
+    try {
+        const { title, content } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({ message: 'Title and content are required' });
+        }
+
+        const note = await Note.findById(req.params.id);
+
+        if (!note) {
+            return res.status(404).json({ message: 'Note not found' });
+        }
+
+        note.title = title;
+        note.content = content;
+
+        const updatedNote = await note.save();
+
+        // Log the update non-blocking
+        logActivity('NOTE_UPDATED', updatedNote.title);
+
+        res.status(200).json(updatedNote);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 // @desc    Delete a note
 // @route   DELETE /api/notes/:id
 // @access  Public
