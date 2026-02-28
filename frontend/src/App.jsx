@@ -1,9 +1,13 @@
 import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import NoteForm from './components/NoteForm';
 import NotesList from './components/NotesList';
 import ExportButton from './components/ExportButton';
 
-function App() {
+function MainApp() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -14,7 +18,7 @@ function App() {
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
       <header className="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
-        <h1 className="text-3xl font-bold text-gray-800 tracking-tight">MyNotes</h1>
+        <Link to="/" className="text-3xl font-bold text-gray-800 tracking-tight hover:text-blue-600 transition-colors">MyNotes</Link>
         <ExportButton hasNotes={notes.length > 0} />
       </header>
 
@@ -32,6 +36,19 @@ function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        {/* Placeholder for future routes (e.g., Settings, Profile) */}
+        <Route path="*" element={<MainApp />} />
+      </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </Router>
   );
 }
 

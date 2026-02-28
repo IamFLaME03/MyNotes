@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react';
 import { getNotes, deleteNote } from '../services/api';
+import { toast } from 'react-toastify';
 
 const NotesList = ({ notes, setNotes, loading, setLoading }) => {
-    const [error, setError] = useState(null);
-
     useEffect(() => {
         const fetchNotes = async () => {
             try {
                 setLoading(true);
                 const data = await getNotes();
                 setNotes(data);
-                setError(null);
             } catch (err) {
-                setError('Failed to load notes');
+                toast.error('Failed to load notes from server');
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -28,14 +26,14 @@ const NotesList = ({ notes, setNotes, loading, setLoading }) => {
         try {
             await deleteNote(id);
             setNotes(notes.filter(note => note._id !== id));
+            toast.info('Note deleted');
         } catch (err) {
             console.error('Failed to delete note', err);
-            alert('Error deleting note');
+            toast.error('Error deleting note');
         }
     };
 
     if (loading && notes.length === 0) return <div className="text-center p-8 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-100">Loading notes...</div>;
-    if (error) return <div className="text-red-600 bg-red-50 p-4 rounded-lg mb-4 text-sm">{error}</div>;
 
     return (
         <div>
